@@ -1,10 +1,13 @@
 let sanityValueMax;
 let enduranceValueMax;
-
+let temporaryCharacter;
+let currentPhase;
 const chosenCharacter = document.cookie
    .split('; ')
    .find((row) => row.startsWith('character='))
    .split('=')[1];
+
+
 
 const fillCharacter = (character) => {
    const lore = document.querySelector('aside');
@@ -91,6 +94,7 @@ const fillCharacter = (character) => {
    concentration.innerHTML = character.concentration;
 };
 
+
 const loadCharacter = () => {
    const requestURL = `./characters/${chosenCharacter}.json`;
    const request = new XMLHttpRequest();
@@ -99,6 +103,17 @@ const loadCharacter = () => {
    request.send();
    request.onload = () => {
       const character = request.response;
+      temporaryCharacter = {
+         'name': character.name
+      }
+      temporaryCharacter.name = {
+         'sanity': character.sanity,
+         'endurance': character.endurance,
+         'speedSneakValue': 1,
+         'prowessWillValue': 1,
+         'knowledgeLuckValue': 1,
+         'concentration': character.concentration
+      }
       while (character === null) alert(`Can't find ${chosenCharacter}.json!`);
       fillCharacter(character);
       preloaderFadeOut(500, 250);
@@ -106,7 +121,7 @@ const loadCharacter = () => {
 };
 
 loadCharacter();
-
+console.log(temporaryCharacter);
 const loreButton = document.querySelector('button#loreClick');
 
 function loreToggle() {
@@ -122,25 +137,28 @@ const sanityPlus = document.querySelector('div.sanity>div.plus');
 const sanityValue = document.querySelector('div.sanity>div.value');
 
 function sanityValueMinus() {
-   let value = parseInt(sanityValue.textContent);
-   value <= 0 ? (value = 0) : value--;
-   sanityValue.textContent = value;
-   if (sanityValue.textContent == sanityValueMax) {
-      sanityValue.style.color = 'rgb(0, 100, 170)';
-      sanityValue.style.fontWeight = '700';
-   } else if (sanityValue.textContent < sanityValueMax) {
-      sanityValue.style.fontWeight = '300';
-   } else {
-      sanityValue.style.color = '#000';
-      sanityValue.style.fontWeight = '700';
-   }
+      let value = parseInt(sanityValue.textContent);
+      value <= 0 ? (value = 0) : value--;
+      temporaryCharacter.sanity = value;
+      sanityValue.textContent = temporaryCharacter.sanity;
+      temporaryCharacter.sanity = value;
+      if (sanityValue.textContent == sanityValueMax) {
+         sanityValue.style.color = 'rgb(0, 100, 170)';
+         sanityValue.style.fontWeight = '700';
+      } else if (sanityValue.textContent < sanityValueMax) {
+         sanityValue.style.fontWeight = '300';
+      } else {
+         sanityValue.style.color = '#000';
+         sanityValue.style.fontWeight = '700';
+      }
 }
 sanityMinus.addEventListener('click', sanityValueMinus);
 
 function sanityValuePlus() {
    let value = parseInt(sanityValue.textContent);
    value >= 99 ? (value = 99) : value++;
-   sanityValue.textContent = value;
+   temporaryCharacter.sanity = value;
+   sanityValue.textContent = temporaryCharacter.sanity;
    if (sanityValue.textContent == sanityValueMax) {
       sanityValue.style.color = 'rgb(0, 100, 170)';
       sanityValue.style.fontWeight = '700';
@@ -156,11 +174,14 @@ sanityPlus.addEventListener('click', sanityValuePlus);
 const enduranceMinus = document.querySelector('div.endurance>div.minus');
 const endurancePlus = document.querySelector('div.endurance>div.plus');
 const enduranceValue = document.querySelector('div.endurance>div.value');
-
+const speedSneakValue = document.querySelector('div.slider>input.speedSneak');
+const prowessWillValue = document.querySelector('div.slider>input.prowessWill');
+const knowledgeLuckValue = document.querySelector('div.slider>input.knowledgeLuck');
 function enduranceValueMinus() {
    let value = parseInt(enduranceValue.textContent);
    value <= 0 ? (value = 0) : value--;
-   enduranceValue.textContent = value;
+   temporaryCharacter.endurance = value;
+   enduranceValue.textContent = temporaryCharacter.endurance;
    if (enduranceValue.textContent == enduranceValueMax) {
       enduranceValue.style.color = 'rgb(175,30,0)';
       enduranceValue.style.fontWeight = '700';
@@ -176,7 +197,8 @@ enduranceMinus.addEventListener('click', enduranceValueMinus);
 function enduranceValuePlus() {
    let value = parseInt(enduranceValue.textContent);
    value >= 99 ? (value = 99) : value++;
-   enduranceValue.textContent = value;
+   temporaryCharacter.endurance = value;
+   enduranceValue.textContent = temporaryCharacter.endurance;
    if (enduranceValue.textContent == enduranceValueMax) {
       enduranceValue.style.color = 'rgb(175,30,0)';
       enduranceValue.style.fontWeight = '700';
@@ -188,6 +210,13 @@ function enduranceValuePlus() {
    }
 }
 endurancePlus.addEventListener('click', enduranceValuePlus);
+
+speedSneakValue.addEventListener('change', onChangespeedSneakSlider);
+
+function onChangespeedSneakSlider() {
+   temporaryCharacter.name.speedSneakValue = speedSneakValue.value;
+   console.log(temporaryCharacter.name.speedSneakValue);
+}
 
 // Phases
 const phaseSection = document.querySelector('section#phase');
@@ -220,7 +249,7 @@ const slideToLeft = (duration) => {
    }, duration * 3);
 };
 
-let currentPhase;
+
 
 firebase
    .database()
@@ -231,7 +260,7 @@ firebase
    });
 
 const updatePhase = (value) => {
-   let currentPhase = value;
+   currentPhase = value;
    slideToLeft(500);
    setTimeout(() => {
       const phases = {
@@ -254,26 +283,41 @@ const updatePhase = (value) => {
          phaseNumber.textContent = 'I';
          nextPhaseName.textContent = phases.second;
          nextPhaseNumber.textContent = 'II';
+         speedSneakValue.disabled = false;
+         prowessWillValue.disabled = false;
+         knowledgeLuckValue.disabled = false;
       } else if (currentPhase === 1) {
          phaseName.textContent = phases.second;
          phaseNumber.textContent = 'II';
          nextPhaseName.textContent = phases.third;
          nextPhaseNumber.textContent = 'III';
+         speedSneakValue.disabled = true;
+         prowessWillValue.disabled = true;
+         knowledgeLuckValue.disabled = true;
       } else if (currentPhase === 2) {
          phaseName.textContent = phases.third;
          phaseNumber.textContent = 'III';
          nextPhaseName.textContent = phases.fourth;
          nextPhaseNumber.textContent = 'IV';
+         speedSneakValue.disabled = true;
+         prowessWillValue.disabled = true;
+         knowledgeLuckValue.disabled = true;
       } else if (currentPhase === 3) {
          phaseName.textContent = phases.fourth;
          phaseNumber.textContent = 'IV';
          nextPhaseName.textContent = phases.fifth;
          nextPhaseNumber.textContent = 'V';
+         speedSneakValue.disabled = true;
+         prowessWillValue.disabled = true;
+         knowledgeLuckValue.disabled = true;
       } else {
          phaseName.textContent = phases.fifth;
          phaseNumber.textContent = 'V';
          nextPhaseName.textContent = phases.first;
          nextPhaseNumber.textContent = 'I';
+         speedSneakValue.disabled = true;
+         prowessWillValue.disabled = true;
+         knowledgeLuckValue.disabled = true;
       }
    }, 500);
 };
