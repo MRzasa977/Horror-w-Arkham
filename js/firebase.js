@@ -1,12 +1,12 @@
 var firebaseConfig = {
-   apiKey: 'AIzaSyCuWKnnEOG0WIYLlTS2OYLILt1r_DFXKUs',
-   authDomain: 'horror-w-arkham.firebaseapp.com',
-   databaseURL: 'https://horror-w-arkham-default-rtdb.firebaseio.com',
-   projectId: 'horror-w-arkham',
-   storageBucket: 'horror-w-arkham.appspot.com',
-   messagingSenderId: '702466094694',
-   appId: '1:702466094694:web:e52e4be8314fd1ce90dfa7',
-   measurementId: 'G-19QWGH08BS',
+   apiKey: "AIzaSyDxY0FB6m9kTfVEJw-H5K9_BIqheOgsMn8",
+   authDomain: "arkhamhorror-b8700.firebaseapp.com",
+   databaseURL: "https://arkhamhorror-b8700-default-rtdb.europe-west1.firebasedatabase.app",
+   projectId: "arkhamhorror-b8700",
+   storageBucket: "arkhamhorror-b8700.appspot.com",
+   messagingSenderId: "621707380321",
+   appId: "1:621707380321:web:c3d13c123ff04f65e48c20",
+   measurementId: "G-ESK4KVY2VR"
 };
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
